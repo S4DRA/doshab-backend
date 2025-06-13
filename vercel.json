@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "functions": {
+    "api/getGenerativeResponse.ts": {
+      "memory": 1024
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/getGenerativeResponse",
+      "destination": "/api/getGenerativeResponse"
+    }
+  ]
+}
