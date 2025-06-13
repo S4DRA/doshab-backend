@@ -23,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 2. --- SETUP GEMINI WITH FUNCTION CALLING ---
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({
-        model: "gemini-pro", // This model supports function calling
+        model:"gemini-1.0-pro", // This model supports function calling
         tools: {
             // Define the custom function that Gemini can ask us to run
             functionDeclarations: [
