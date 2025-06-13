@@ -68,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // In a real app, you would have a more robust "family" table in your DB
         if (name.includes("dad")) {
             // !!! IMPORTANT: CHANGE THIS to a real user's email that exists in your Supabase 'locations' table for testing !!!
-            targetEmail = "s4dra.01@gmail.com"; 
+            targetEmail = "so4nper@gmail.com"; 
         } else {
             // If it's not a special name, assume the name itself is the email
             targetEmail = name;
