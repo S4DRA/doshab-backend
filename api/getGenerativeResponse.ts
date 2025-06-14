@@ -1,6 +1,6 @@
 // in api/getGenerativeResponse.ts
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
@@ -29,13 +29,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 functionDeclarations: [ // <-- And we must use 'functionDeclarations' here
                     {
                         name: "getFamilyMemberLocation",
-                        description: "Get the current GPS location of a family member by name",
-                        parameters: {
-                            type: "OBJECT",
+                        description: "Get the current GPS location of a family member by name",parameters: {
+                            type: SchemaType.OBJECT, // Use the enum
                             properties: {
                                 name: {
-                                    type: "STRING",
-                                    description: "The name of the family member, e.g., 'dad', 'mom', or their email.",
+                                    type: SchemaType.STRING, // Use the enum
+                                     description: "The name of the family member, e.g., 'dad', 'mom', or their email.",
                                 },
                             },
                             required: ["name"],
