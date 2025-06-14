@@ -12,5 +12,8 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.50.0"
+  },
+  "devDependencies": {
+    "@vercel/node": "^2.15.10"
   }
 }

@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         model:"gemini-1.0-pro", // This model supports function calling
         tools: {
             // Define the custom function that Gemini can ask us to run
-            functionDeclarations: [
+            functions: [
                 {
                     name: "getFamilyMemberLocation",
                     description: "Get the current GPS location of a family member by name",
@@ -61,7 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (call.name === "getFamilyMemberLocation") {
         console.log("Gemini wants to call getFamilyMemberLocation with args:", call.args);
         
-        const name = (call.args.name || "").toLowerCase();
+        const name = ((call.args as { name: string }).name || "").toLowerCase();
         let targetEmail = "";
 
         // --- This is our simple logic to map names to emails ---
