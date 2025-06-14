@@ -29,12 +29,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 functionDeclarations: [ // <-- And we must use 'functionDeclarations' here
                     {
                         name: "getFamilyMemberLocation",
-                        description: "Get the current GPS location of a family member by name",parameters: {
+                        description: "Get the current GPS location of a member by name",parameters: {
                             type: SchemaType.OBJECT, // Use the enum
                             properties: {
                                 name: {
                                     type: SchemaType.STRING, // Use the enum
-                                     description: "The name of the family member, e.g., 'dad', 'mom', or their email.",
+                                     description: "The name of the member, e.g., 'dad', 'mom', or their email.",
                                 },
                             },
                             required: ["name"],
