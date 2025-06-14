@@ -22,27 +22,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 2. --- SETUP GEMINI WITH FUNCTION CALLING ---
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({
-        model:"gemini-1.0-pro", // This model supports function calling
-        tools: {
-            // Define the custom function that Gemini can ask us to run
-            functions: [
-                {
-                    name: "getFamilyMemberLocation",
-                    description: "Get the current GPS location of a family member by name",
-                    parameters: {
-                        type: "OBJECT",
-                        properties: {
-                            name: {
-                                type: "STRING",
-                                description: "The name of the family member, e.g., 'dad', 'mom', or their email.",
+   const model = genAI.getGenerativeModel({
+        model: "gemini-1.0-pro",
+        tools: [ // <-- The 'tools' property is now the array itself
+            {
+                functionDeclarations: [ // <-- And we must use 'functionDeclarations' here
+                    {
+                        name: "getFamilyMemberLocation",
+                        description: "Get the current GPS location of a family member by name",
+                        parameters: {
+                            type: "OBJECT",
+                            properties: {
+                                name: {
+                                    type: "STRING",
+                                    description: "The name of the family member, e.g., 'dad', 'mom', or their email.",
+                                },
                             },
+                            required: ["name"],
                         },
-                        required: ["name"],
                     },
-                },
-            ],
-        },
+                ]
+            }
+        ]
     });
 
     // 3. --- FIRST CALL TO GEMINI ---
