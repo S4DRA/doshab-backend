@@ -8,7 +8,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(405).json({ error: 'Method not allowed. Use POST.' });
     }
 
-    const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+   const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+    // Add this explicit options block
+    { db: { schema: 'public' } }
+    );
     const authHeader = req.headers.authorization;
     if (!authHeader) { return res.status(401).json({ error: 'Missing auth token.' }); }
 

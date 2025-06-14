@@ -11,6 +11,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const supabase = createClient(
         process.env.SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_KEY!
+        { db: { schema: 'public' } }
+
     );
 
     // Get the prompt from the incoming request from the Android app
@@ -28,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             {
                 functionDeclarations: [ // <-- And we must use 'functionDeclarations' here
                     {
-                        name: "getFamilyMemberLocation",
+                        name: "getMemberLocation",
                         description: "Get the current GPS location of a member by name",parameters: {
                             type: SchemaType.OBJECT, // Use the enum
                             properties: {
@@ -58,7 +60,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // If Gemini DID ask to call our function...
-    if (call.name === "getFamilyMemberLocation") {
+    if (call.name === "getMemberLocation") {
         console.log("Gemini wants to call getFamilyMemberLocation with args:", call.args);
         
         const name = ((call.args as { name: string }).name || "").toLowerCase();
