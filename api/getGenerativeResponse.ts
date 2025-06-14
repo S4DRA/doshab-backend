@@ -23,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 2. --- SETUP GEMINI WITH FUNCTION CALLING ---
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
    const model = genAI.getGenerativeModel({
-        model: "gemini-1.0-pro",
+        model: "gemini-1.5-flash-latest",
         tools: [ // <-- The 'tools' property is now the array itself
             {
                 functionDeclarations: [ // <-- And we must use 'functionDeclarations' here
