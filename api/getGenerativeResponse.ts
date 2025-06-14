@@ -9,10 +9,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 1. --- INITIALIZATION ---
     // Initialize Supabase client with the secret service key from environment variables
     const supabase = createClient(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_KEY!
-        { db: { schema: 'public' } }
-
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!, // <-- ADD THE MISSING COMMA HERE
+    { db: { schema: 'public' } }
     );
 
     // Get the prompt from the incoming request from the Android app
