@@ -16,18 +16,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(401).json({ error: 'Invalid token.' });
     }
 
-    // Find connections where I am the approver AND the status is pending
-    // Also fetch the nickname the requester gave me (from the perspective of the requester)
-    // And fetch the requester's profile so I can see who they are
+    // --- THIS IS THE NEW, MORE ROBUST QUERY ---
+    // It specifies the foreign key relationship directly.
     const { data, error } = await supabase
         .from('connections')
         .select(`
             id,
             requester_id,
-            profiles:requester_id ( email, doCode )
+            requesterProfile:requester_id( email, doCode )
         `)
         .eq('approver_id', currentUser.id)
         .eq('status', 'pending');
+
+    // Also, rename 'profiles' to 'requesterProfile' to match the data class
+    // in the Android app for clarity. You'll need to update the data class.
 
     if (error) {
         return res.status(500).json({ error: `Database error: ${error.message}` });
