@@ -4,7 +4,11 @@ import { createClient } from "@supabase/supabase-js";
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+    const supabase = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_KEY!
+    );
+
     const authHeader = req.headers.authorization;
     const jwt = authHeader?.split(' ')[1];
     if (!jwt) { return res.status(401).json({ error: 'Missing token.' }); }
@@ -15,31 +19,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        // --- STEP 1: Get all PENDING connection rows for me ---
+        // Step 1: Get the basic connection rows where I am the approver
         const { data: pendingConnections, error: connectionsError } = await supabase
             .from('connections')
-            .select('id, requester_id')
+            .select('id, requester_id') // Get the connection ID and who sent it
             .eq('approver_id', currentUser.id)
             .eq('status', 'pending');
 
-        if (connectionsError) throw new Error(connectionsError.message);
+        if (connectionsError) throw connectionsError;
         if (!pendingConnections || pendingConnections.length === 0) {
-            // This is a success case. The user just has no requests.
-            return res.status(200).json([]);
+            return res.status(200).json([]); // Success, just no requests
         }
 
-        // --- STEP 2: Get a list of all the IDs of the people who sent requests ---
+        // Step 2: Get the IDs of everyone who sent a request
         const requesterIds = pendingConnections.map(c => c.requester_id);
 
-        // --- STEP 3: Get all the profiles for those specific IDs ---
+        // Step 3: Get the profiles for ONLY those people
         const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
             .select('id, email')
-            .in('id', requesterIds); // `in` is like "where id is one of these..."
+            .in('id', requesterIds);
 
-        if (profilesError) throw new Error(profilesError.message);
+        if (profilesError) throw profilesError;
 
-        // --- STEP 4: Manually combine the two lists ---
+        // Step 4: Manually combine the information
         const finalResponse = pendingConnections.map(conn => {
             const matchingProfile = profiles.find(p => p.id === conn.requester_id);
             return {
@@ -54,6 +57,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(200).json(finalResponse);
 
     } catch (e: any) {
-        return res.status(500).json({ error: `Server Query Failed: ${e.message}` });
+        return res.status(500).json({ error: e.message });
     }
 }
