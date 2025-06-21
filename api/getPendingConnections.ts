@@ -6,7 +6,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     const supabase = createClient(
         process.env.SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_KEY!
+        process.env.SUPABASE_SERVICE_KEY!,
+        { db: { schema: 'public' } }
     );
 
     const authHeader = req.headers.authorization;
@@ -19,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        // Step 1: Get the basic connection rows where I am the approver
+        // Step 1: Get the basic connection rows where I am the approver and status is pending
         const { data: pendingConnections, error: connectionsError } = await supabase
             .from('connections')
             .select('id, requester_id') // Get the connection ID and who sent it
@@ -27,36 +28,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .eq('status', 'pending');
 
         if (connectionsError) throw connectionsError;
+
+        // If there are no pending requests, return an empty array successfully
         if (!pendingConnections || pendingConnections.length === 0) {
-            return res.status(200).json([]); // Success, just no requests
+            return res.status(200).json([]);
         }
 
-        // Step 2: Get the IDs of everyone who sent a request
+        // Step 2: Extract just the IDs of the people who sent the requests
         const requesterIds = pendingConnections.map(c => c.requester_id);
 
-        // Step 3: Get the profiles for ONLY those people
+        // Step 3: Fetch all the profiles for ONLY those specific user IDs
         const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
-            .select('id, email')
+            .select('id, email, doCode') // Get the info we need
             .in('id', requesterIds);
 
         if (profilesError) throw profilesError;
 
-        // Step 4: Manually combine the information
-        const finalResponse = pendingConnections.map(conn => {
-            const matchingProfile = profiles.find(p => p.id === conn.requester_id);
+        // Step 4: Manually combine the information into the structure the app expects
+        const finalResponse = pendingConnections.map(connection => {
+            const matchingProfile = profiles.find(p => p.id === connection.requester_id);
             return {
-                id: conn.id,
-                requesterId: conn.requester_id,
+                id: connection.id,
+                requester_id: connection.requester_id,
                 requesterProfile: {
-                    email: matchingProfile?.email || 'Unknown User'
+                    email: matchingProfile?.email || 'Unknown User',
+                    doCode: matchingProfile?.doCode || 'N/A'
                 }
             };
         });
 
+        // Return the successfully combined data
         return res.status(200).json(finalResponse);
 
     } catch (e: any) {
+        // Catch any other unexpected errors
         return res.status(500).json({ error: e.message });
     }
 }
